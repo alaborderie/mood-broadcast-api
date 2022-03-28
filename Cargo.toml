@@ -1,0 +1,35 @@
+[package]
+name = "mood-broadcast-api"
+version = "0.1.0"
+edition = "2021"
+authors = ["Antoine Laborderie <antoine.laborderie@gmail.com"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rocket = "0.4.7"
+diesel_migrations = "1.4.0"
+serde = "1.0.123"
+serde_derive = "1.0.123"
+serde_json = "1.0.62"
+log = "0.4.14"
+jsonwebtoken = "7.2.0"
+bcrypt = "0.9.0"
+dotenv = "0.15.0"
+
+[dependencies.rocket_contrib]
+version = "0.4.7"
+default-features = false
+features = ["diesel_postgres_pool", "json"]
+
+[dependencies.diesel]
+version = "1.4.5"
+features = ["postgres", "r2d2", "chrono"]
+
+[dependencies.chrono]
+version = "0.4.19"
+features = ["serde"]
+
+[dependencies.uuid]
+version = "0.8.2"
+features = ["v4"]

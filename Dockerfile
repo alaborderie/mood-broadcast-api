@@ -1,0 +1,31 @@
+FROM rustlang/rust:nightly as builder
+
+RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev
+
+WORKDIR /app
+
+COPY ./Cargo.toml ./Cargo.toml
+COPY ./Cargo.lock ./Cargo.lock
+COPY ./src ./src
+COPY ./migrations ./migrations
+COPY ./diesel.toml .
+
+RUN touch Rocket.toml; \
+    printf "[global.databases]\npostgres_database = { url = \"postgres://postgres:postgres@db/postgres\" }\n" > Rocket.toml; \
+    head -c16 /dev/urandom > src/secret.key; \
+    cargo build --release
+
+FROM debian:buster-slim
+
+RUN mkdir app
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev
+
+COPY --from=build /app/target/release/mood-broadcast-api .
+COPY --from=build /app/Rocket.toml .
+COPY --from=build /app/diesel.toml .
+
+EXPOSE 8000
+
+ENTRYPOINT ["/app/mood-broadcast-api"]
