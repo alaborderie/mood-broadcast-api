@@ -1,4 +1,4 @@
-FROM rustlang/rust:nightly as builder
+FROM rustlang/rust as builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev
 

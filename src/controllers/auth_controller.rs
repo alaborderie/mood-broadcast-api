@@ -1,9 +1,9 @@
-use crate::config::DbConn;
+use crate::DbConn;
 use crate::models::response::Response;
 use crate::models::user::{LoginDTO, UserDTO};
 use rocket::http::Status;
 use rocket::response::status;
-use rocket_contrib::json::Json;
+use rocket::serde::json::Json;
 use crate::services::auth_service;
 
 #[post("/login", format = "json", data = "<login>")]

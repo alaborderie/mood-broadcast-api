@@ -1,20 +1,23 @@
+use crate::models::response::Response;
+use crate::models::user::{LoginInfoDTO, User};
+use crate::DbConn;
 use chrono::Utc;
-use crate::config::DbConn;
 use jsonwebtoken::errors::Result;
 use jsonwebtoken::TokenData;
+use jsonwebtoken::{DecodingKey, EncodingKey};
 use jsonwebtoken::{Header, Validation};
-use jsonwebtoken::{EncodingKey, DecodingKey};
-use crate::models::response::Response;
-use crate::models::user::{ User, LoginInfoDTO };
 use rocket::http::Status;
-use rocket::outcome::Outcome;
+use rocket::outcome::{try_outcome, Outcome};
 use rocket::request::{self, FromRequest, Request};
 use rocket::response::status;
-use rocket_contrib::json::Json;
+use rocket::serde::json::{from_str, Json};
+use rocket::serde::Deserialize;
+use rocket::serde::Serialize;
 
 static ONE_DAY: i64 = 60 * 60 * 24; // in seconds
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
 pub struct UserToken {
     // issued at
     pub iat: i64,
@@ -25,21 +28,24 @@ pub struct UserToken {
     pub login_session: String,
 }
 
-impl<'a, 'r> FromRequest<'a, 'r> for UserToken {
+#[rocket::async_trait]
+impl<'r> FromRequest<'r> for UserToken {
     type Error = status::Custom<Json<Response>>;
-    fn from_request(
-        request: &'a Request<'r>,
+    async fn from_request(
+        request: &'r Request<'_>,
     ) -> request::Outcome<Self, status::Custom<Json<Response>>> {
-        let conn = request.guard::<DbConn>().unwrap();
-        if let Some(authen_header) = request.headers().get_one("Authorization") {
-            let authen_str = authen_header.to_string();
-            if authen_str.starts_with("Bearer") {
-                let token = authen_str[6..authen_str.len()].trim();
-                if let Ok(token_data) = decode_token(token.to_string()) {
-                    if verify_token(&token_data, &conn) {
-                        return Outcome::Success(token_data.claims);
+        let conn = request.guard::<DbConn>().await.succeeded();
+        if conn.is_some() {
+            if let Some(authen_header) = request.headers().get_one("Authorization") {
+                let authen_str = authen_header.to_string();
+                if authen_str.starts_with("Bearer") {
+                    let token = authen_str[6..authen_str.len()].trim();
+                    if let Ok(token_data) = decode_token(token.to_string()) {
+                        if verify_token(&token_data, &conn.unwrap()) {
+                            return Outcome::Success(token_data.claims);
+                        }
                     }
-                } 
+                }
             }
         }
 
@@ -49,7 +55,7 @@ impl<'a, 'r> FromRequest<'a, 'r> for UserToken {
                 Status::Unauthorized,
                 Json(Response {
                     message: String::from("Invalid token, please login again"),
-                    data: serde_json::to_value("").unwrap(),
+                    data: from_str("").unwrap(),
                 }),
             ),
         ))
@@ -65,11 +71,20 @@ pub fn generate_token(login: LoginInfoDTO) -> String {
         login_session: login.login_session,
     };
 
-    jsonwebtoken::encode(&Header::default(), &payload, &EncodingKey::from_secret(include_bytes!("secret.key"))).unwrap()
+    jsonwebtoken::encode(
+        &Header::default(),
+        &payload,
+        &EncodingKey::from_secret(include_bytes!("secret.key")),
+    )
+    .unwrap()
 }
 
 fn decode_token(token: String) -> Result<TokenData<UserToken>> {
-    jsonwebtoken::decode::<UserToken>(&token, &DecodingKey::from_secret(include_bytes!("secret.key")), &Validation::default())
+    jsonwebtoken::decode::<UserToken>(
+        &token,
+        &DecodingKey::from_secret(include_bytes!("secret.key")),
+        &Validation::default(),
+    )
 }
 
 fn verify_token(token_data: &TokenData<UserToken>, conn: &DbConn) -> bool {

@@ -1,9 +1,9 @@
 use chrono::{DateTime, Utc};
 use diesel::prelude::*;
-use diesel::PgConnection;
 use crate::schema::auth;
 use crate::schema::auth::dsl::*;
 use crate::models::user::User;
+use crate::DbConn;
 
 #[derive(Identifiable, Associations, Queryable)]
 #[belongs_to(User)]
@@ -22,7 +22,7 @@ pub struct AuthDTO {
 }
 
 impl Auth {
-    pub fn create(username: &str, conn: &PgConnection) -> Option<AuthDTO> {
+    pub fn create(username: &str, conn: &DbConn) -> Option<AuthDTO> {
         if let Some(user) = User::find_user_by_username(username, conn) {
             Some(AuthDTO {
                 user_id: user.id,
@@ -33,7 +33,7 @@ impl Auth {
         }
     }
 
-    pub fn save_auth(insert_record: AuthDTO, conn: &PgConnection) -> bool {
+    pub fn save_auth(insert_record: AuthDTO, conn: &DbConn) -> bool {
         diesel::insert_into(auth)
             .values(&insert_record)
             .execute(conn)

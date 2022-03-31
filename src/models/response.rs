@@ -1,6 +1,8 @@
-use serde_json::Value;
+use rocket::serde::json::Value;
+use rocket::serde::{Serialize, Deserialize};
 
 #[derive(Debug, Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
 pub struct Response {
     pub message: String,
     pub data: Value,
