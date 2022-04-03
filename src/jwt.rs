@@ -7,7 +7,7 @@ use jsonwebtoken::TokenData;
 use jsonwebtoken::{DecodingKey, EncodingKey};
 use jsonwebtoken::{Header, Validation};
 use rocket::http::Status;
-use rocket::outcome::{try_outcome, Outcome};
+use rocket::outcome::Outcome;
 use rocket::request::{self, FromRequest, Request};
 use rocket::response::status;
 use rocket::serde::json::{from_str, Json};
@@ -16,7 +16,7 @@ use rocket::serde::Serialize;
 
 static ONE_DAY: i64 = 60 * 60 * 24; // in seconds
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct UserToken {
     // issued at
@@ -41,8 +41,9 @@ impl<'r> FromRequest<'r> for UserToken {
                 if authen_str.starts_with("Bearer") {
                     let token = authen_str[6..authen_str.len()].trim();
                     if let Ok(token_data) = decode_token(token.to_string()) {
-                        if verify_token(&token_data, &conn.unwrap()) {
-                            return Outcome::Success(token_data.claims);
+                        let claims = token_data.claims.clone();
+                        if verify_token(token_data, &conn.unwrap()).await {
+                            return Outcome::Success(claims);
                         }
                     }
                 }
@@ -87,6 +88,6 @@ fn decode_token(token: String) -> Result<TokenData<UserToken>> {
     )
 }
 
-fn verify_token(token_data: &TokenData<UserToken>, conn: &DbConn) -> bool {
-    User::is_valid_login_session(&token_data.claims, conn)
+async fn verify_token(token_data: TokenData<UserToken>, conn: &DbConn) -> bool {
+    User::is_valid_login_session(token_data.claims, conn).await
 }

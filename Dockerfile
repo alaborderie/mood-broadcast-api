@@ -1,4 +1,4 @@
-FROM rustlang/rust as builder
+FROM rust as build
 
 RUN apt-get update && apt-get install -y --no-install-recommends libpq-dev
 
@@ -15,7 +15,7 @@ RUN touch Rocket.toml; \
     head -c16 /dev/urandom > src/secret.key; \
     cargo build --release
 
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 
 RUN mkdir app
 WORKDIR /app

@@ -5,8 +5,8 @@ use crate::models::user::{LoginDTO, User, UserDTO};
 use rocket::http::Status;
 use rocket::serde::json::{json, from_str};
 
-pub fn signup(user: UserDTO, conn: DbConn) -> ResponseWithStatus {
-    if User::signup(user, &conn) {
+pub async fn signup(user: UserDTO, conn: DbConn) -> ResponseWithStatus {
+    if User::signup(user, conn).await {
         ResponseWithStatus {
             status_code: Status::Ok.code,
             response: Response {
@@ -25,14 +25,13 @@ pub fn signup(user: UserDTO, conn: DbConn) -> ResponseWithStatus {
     }
 }
 
-pub fn login(login: LoginDTO, conn: DbConn) -> ResponseWithStatus {
-    if let Some(result) = User::login(login, &conn) {
+pub async fn login(login: LoginDTO, conn: DbConn) -> ResponseWithStatus {
+    if let Some(result) = User::login(login, conn).await {
         ResponseWithStatus {
             status_code: Status::Ok.code,
             response: Response {
                 message: String::from("Login was successfull."),
-                data: from_str(json!({ "token": jwt::generate_token(result), "type": "Bearer" }))
-                    .unwrap(),
+                data: json!({ "token": jwt::generate_token(result), "type": "Bearer" })
             },
         }
     } else {

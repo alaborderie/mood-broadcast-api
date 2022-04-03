@@ -9,16 +9,7 @@ To run the project, you need to create :
 
 # Run the project without Docker
 
-We need to use nightly to be able to put this in main.rs : 
-```
-#![feature(proc_macro_hygiene, decl_macro)]
-#![allow(proc_macro_derive_resolution_fallback)]
-```
-
-You can use `rustup default nightly` but there is currently a [bug](https://github.com/rust-lang/rust/issues/95267) so you can use `rustup default nightly-2022-03-22` instead.
-If you don't want to change global rustup, use `rustup override set nightly-2022-03-22` instead.
-
-And then `cargo run` and you're good to go!
+`cargo run` and you're good to go!
 
 # Run the project using Docker
 
