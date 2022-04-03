@@ -1,5 +1,5 @@
 use rocket::serde::json::Value;
-use rocket::serde::{Serialize, Deserialize};
+use rocket::serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -11,5 +11,5 @@ pub struct Response {
 #[derive(Debug)]
 pub struct ResponseWithStatus {
     pub status_code: u16,
-    pub response: Response
+    pub response: Response,
 }

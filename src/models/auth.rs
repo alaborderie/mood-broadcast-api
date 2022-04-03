@@ -1,9 +1,9 @@
-use chrono::{DateTime, Utc};
-use diesel::prelude::*;
+use crate::models::user::User;
 use crate::schema::auth;
 use crate::schema::auth::dsl::*;
-use crate::models::user::User;
 use crate::DbConn;
+use chrono::{DateTime, Utc};
+use diesel::prelude::*;
 
 #[derive(Identifiable, Associations, Queryable)]
 #[belongs_to(User)]
@@ -35,10 +35,11 @@ impl Auth {
 
     pub async fn save_auth(insert_record: AuthDTO, db: &DbConn) -> bool {
         db.run(move |conn| {
-        diesel::insert_into(auth)
-            .values(&insert_record)
-            .execute(conn)
-            .is_ok()
-        }).await
+            diesel::insert_into(auth)
+                .values(&insert_record)
+                .execute(conn)
+                .is_ok()
+        })
+        .await
     }
 }

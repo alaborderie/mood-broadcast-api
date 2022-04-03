@@ -122,10 +122,10 @@ impl User {
         login_session_str: String,
         db: &DbConn,
     ) -> bool {
-        if let Some(user) = User::find_user_by_username(un, &db).await {
+        if let Some(user) = User::find_user_by_username(un, db).await {
             db.run(move |conn| {
                 diesel::update(users.find(user.id))
-                    .set(login_session.eq(login_session_str.to_string()))
+                    .set(login_session.eq(login_session_str))
                     .execute(conn)
                     .is_ok()
             })
