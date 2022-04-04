@@ -67,12 +67,10 @@ impl User {
             })
             .await;
         if user_to_verify.is_err() {
-            return None
+            return None;
         }
         let user = user_to_verify.unwrap();
-        if !user.password.is_empty()
-            && verify(&login.password, &user.password).unwrap()
-        {
+        if !user.password.is_empty() && verify(&login.password, &user.password).unwrap() {
             if let Some(auth) = Auth::create(&user.username, &db).await {
                 if !Auth::save_auth(auth, &db).await {
                     return None;
