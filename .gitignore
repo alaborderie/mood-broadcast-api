@@ -10,5 +10,4 @@ Cargo.lock
 **/*.rs.bk
 
 .env
-Rocket.toml
 /src/secret.key

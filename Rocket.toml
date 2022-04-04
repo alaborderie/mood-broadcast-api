@@ -1,0 +1,2 @@
+[global.databases]
+postgres_database = { url = "postgres://postgres:postgres@127.0.0.1/mood_broadcast" }
