@@ -35,9 +35,7 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: mood-broadcast
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -45,7 +43,7 @@ jobs:
           --health-retries 5
     steps:
       - name: Checkout sources
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
@@ -55,10 +53,12 @@ jobs:
           override: true
 
       - name: Generate secret.key file and Rocket.toml config
-        run: head -c16 /dev/urandom > src/secret.key && printf "[global.databases]\npostgres_database = { url = \"postgres://postgres:postgres@db/mood-broadcast\" }\n" > Rocket.toml
+        run: head -c16 /dev/urandom > src/secret.key
         shell: bash
 
       - name: Run cargo test
+        env:
+          ROCKET_DATABASES: "{postgres_database={url=\"postgres://postgres:postgres@localhost/postgres\"}}"
         uses: actions-rs/cargo@v1
         with:
           command: test
