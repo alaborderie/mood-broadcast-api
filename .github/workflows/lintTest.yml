@@ -35,9 +35,9 @@ jobs:
         ports:
           - 5432:5432
         env:
-          - POSTGRES_USER=postgres
-          - POSTGRES_PASSWORD=postgres
-          - POSTGRES_DB=mood-broadcast
+          POSTGRES_USER=postgres
+          POSTGRES_PASSWORD=postgres
+          POSTGRES_DB=mood-broadcast
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
