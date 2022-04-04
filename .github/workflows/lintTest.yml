@@ -54,8 +54,8 @@ jobs:
           toolchain: stable 
           override: true
 
-      - name: Generate secret.key file
-        run: head -c16 /dev/urandom > src/secret.key
+      - name: Generate secret.key file and Rocket.toml config
+        run: head -c16 /dev/urandom > src/secret.key && printf "[global.databases]\npostgres_database = { url = \"postgres://postgres:postgres@db/mood-broadcast\" }\n" > Rocket.toml
         shell: bash
 
       - name: Run cargo test
