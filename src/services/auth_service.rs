@@ -11,7 +11,7 @@ pub async fn signup(user: UserDTO, conn: DbConn) -> ResponseWithStatus {
             status_code: Status::Ok.code,
             response: Response {
                 message: String::from("Signup was successfull."),
-                data: from_str("").unwrap(),
+                data: from_str("{}").unwrap(),
             },
         }
     } else {
@@ -19,7 +19,7 @@ pub async fn signup(user: UserDTO, conn: DbConn) -> ResponseWithStatus {
             status_code: Status::BadRequest.code,
             response: Response {
                 message: String::from("Bad request, try to sign up again with correct valeus!"),
-                data: from_str("").unwrap(),
+                data: from_str("{}").unwrap(),
             },
         }
     }
@@ -39,7 +39,7 @@ pub async fn login(login: LoginDTO, conn: DbConn) -> ResponseWithStatus {
             status_code: Status::BadRequest.code,
             response: Response {
                 message: String::from("Wrong email/password combination, try again."),
-                data: from_str("").unwrap(),
+                data: from_str("{}").unwrap(),
             },
         }
     }

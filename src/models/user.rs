@@ -64,22 +64,25 @@ impl User {
                     .filter(username.eq(&login.username_or_email))
                     .or_filter(email.eq(&login.username_or_email))
                     .get_result::<User>(conn)
-                    .unwrap()
             })
             .await;
-        if !user_to_verify.password.is_empty()
-            && verify(&login.password, &user_to_verify.password).unwrap()
+        if user_to_verify.is_err() {
+            return None
+        }
+        let user = user_to_verify.unwrap();
+        if !user.password.is_empty()
+            && verify(&login.password, &user.password).unwrap()
         {
-            if let Some(auth) = Auth::create(&user_to_verify.username, &db).await {
+            if let Some(auth) = Auth::create(&user.username, &db).await {
                 if !Auth::save_auth(auth, &db).await {
                     return None;
                 }
                 let login_session_str = User::generate_login_session();
-                let un: String = user_to_verify.username.to_string();
+                let un: String = user.username.to_string();
                 let session: String = login_session_str.to_string();
                 User::update_login_session_to_db(un, session, &db).await;
                 Some(LoginInfoDTO {
-                    username: user_to_verify.username.to_string(),
+                    username: user.username.to_string(),
                     login_session: login_session_str,
                 })
             } else {
