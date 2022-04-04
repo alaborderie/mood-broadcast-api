@@ -91,3 +91,27 @@ fn decode_token(token: String) -> Result<TokenData<UserToken>> {
 async fn verify_token(token_data: TokenData<UserToken>, conn: &DbConn) -> bool {
     User::is_valid_login_session(token_data.claims, conn).await
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::models::user::LoginInfoDTO;
+
+    #[test]
+    fn test_generate_token() {
+        let login_info = LoginInfoDTO {
+            username: String::from("test_username"),
+            login_session: String::from("some_login_session"),
+        };
+        let jwt = generate_token(login_info);
+        let decoded = decode_token(jwt).unwrap();
+        assert_eq!(
+            String::from(decoded.claims.user),
+            String::from("test_username")
+        );
+        assert_eq!(
+            String::from(decoded.claims.login_session),
+            String::from("some_login_session")
+        );
+    }
+}
