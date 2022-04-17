@@ -1,5 +1,6 @@
 use crate::jwt::UserToken;
 use crate::models::auth::Auth;
+use crate::schema::auth;
 use crate::schema::users;
 use crate::schema::users::dsl::*;
 use crate::DbConn;
@@ -15,7 +16,18 @@ pub struct User {
     pub username: String,
     pub email: String,
     pub password: String,
-    pub login_session: String,
+    pub picture_url: String,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct UserWithAuth {
+    pub id: i32,
+    pub username: String,
+    pub email: String,
+    pub password: String,
+    pub picture_url: String,
+    pub auths: Option<Vec<Auth>>,
 }
 
 #[derive(Insertable, Serialize, Deserialize)]
@@ -25,6 +37,7 @@ pub struct UserDTO {
     pub username: String,
     pub email: String,
     pub password: String,
+    pub picture_url: Option<String>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -34,8 +47,6 @@ pub struct LoginDTO {
     pub password: String,
 }
 
-#[derive(Insertable)]
-#[table_name = "users"]
 pub struct LoginInfoDTO {
     pub username: String,
     pub login_session: String,
@@ -71,14 +82,11 @@ impl User {
         }
         let user = user_to_verify.unwrap();
         if !user.password.is_empty() && verify(&login.password, &user.password).unwrap() {
-            if let Some(auth) = Auth::create(&user.username, &db).await {
+            let login_session_str = User::generate_login_session();
+            if let Some(auth) = Auth::create(&user.username, &login_session_str, &db).await {
                 if !Auth::save_auth(auth, &db).await {
                     return None;
                 }
-                let login_session_str = User::generate_login_session();
-                let un: String = user.username.to_string();
-                let session: String = login_session_str.to_string();
-                User::update_login_session_to_db(un, session, &db).await;
                 Some(LoginInfoDTO {
                     username: user.username.to_string(),
                     login_session: login_session_str,
@@ -94,9 +102,11 @@ impl User {
     pub async fn is_valid_login_session(user_token: UserToken, db: &DbConn) -> bool {
         db.run(move |conn| {
             users
+                .select(users::id)
+                .left_join(auth::table)
                 .filter(username.eq(&user_token.user))
-                .filter(login_session.eq(&user_token.login_session))
-                .get_result::<User>(conn)
+                .filter(auth::login_session.eq(&user_token.login_session))
+                .get_result::<i32>(conn)
                 .is_ok()
         })
         .await
@@ -116,23 +126,5 @@ impl User {
 
     pub fn generate_login_session() -> String {
         Uuid::new_v4().to_simple().to_string()
-    }
-
-    pub async fn update_login_session_to_db(
-        un: String,
-        login_session_str: String,
-        db: &DbConn,
-    ) -> bool {
-        if let Some(user) = User::find_user_by_username(un, db).await {
-            db.run(move |conn| {
-                diesel::update(users.find(user.id))
-                    .set(login_session.eq(login_session_str))
-                    .execute(conn)
-                    .is_ok()
-            })
-            .await
-        } else {
-            false
-        }
     }
 }

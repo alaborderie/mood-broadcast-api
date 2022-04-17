@@ -3,5 +3,5 @@ CREATE TABLE users (
     username VARCHAR NOT NULL,
     email VARCHAR NOT NULL,
     password VARCHAR NOT NULL,
-    login_session VARCHAR NOT NULL DEFAULT ''
+    picture_url VARCHAR NOT NULL DEFAULT ''
 );
