@@ -63,6 +63,7 @@ jobs:
       - name: Run cargo test
         env:
           ROCKET_DATABASES: "{postgres_database={url=\"postgres://postgres:postgres@localhost/postgres\"}}"
+          RUST_TEST_THREADS: 1
         uses: actions-rs/cargo@v1
         with:
           command: test
