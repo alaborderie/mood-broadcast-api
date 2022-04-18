@@ -1,0 +1,5 @@
+CREATE TABLE games (
+    id SERIAL PRIMARY KEY NOT NULL,
+    name VARCHAR NOT NULL,
+    logo_url VARCHAR NOT NULL DEFAULT ''
+);
