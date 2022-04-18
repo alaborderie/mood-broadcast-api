@@ -18,6 +18,7 @@ pub mod schema;
 pub mod services;
 
 use crate::controllers::auth_controller::*;
+use crate::controllers::game_controller::*;
 use diesel_migrations::embed_migrations;
 use rocket::fairing::AdHoc;
 use rocket::{Build, Rocket};
@@ -47,11 +48,16 @@ fn rocket() -> _ {
         .attach(DbConn::fairing())
         .attach(AdHoc::try_on_ignite("Database Migrations", migrate))
         .mount("/api/v1/auth", routes![login, signup])
+        .mount(
+            "/api/v1/games",
+            routes![create_game, find_game_by_id, list_game],
+        )
 }
 
 #[cfg(test)]
 mod integration_test {
     use super::rocket;
+    use crate::models::response::Response;
     use rocket::http::Status;
     use rocket::local::blocking::Client;
     use rocket::serde::json::json;
@@ -59,18 +65,46 @@ mod integration_test {
     #[test]
     fn subscribe_and_login() {
         let client = Client::tracked(rocket()).expect("valid rocket instance");
-        let response = client.post("/api/v1/auth/signup").json(&json!({ "username": "alaborderie", "email": "antoine.laborderie@gmail.com", "password": "PassW0rd!" })).dispatch();
+        let mut response = client.post("/api/v1/auth/signup").json(&json!({ "username": "alaborderie", "email": "antoine.laborderie@gmail.com", "password": "PassW0rd!" })).dispatch();
         assert_eq!(response.status(), Status::Ok);
         assert_eq!(
             response.into_string().unwrap(),
             "{\"message\":\"Signup was successfull.\",\"data\":{}}"
         );
-        let mut response = client.post("/api/v1/auth/login").json(&json!({ "username_or_email": "antoine.laborderie@gmail.com", "password": "PassW0rd!" })).dispatch();
+        response = client.post("/api/v1/auth/login").json(&json!({ "username_or_email": "antoine.laborderie@gmail.com", "password": "PassW0rd!" })).dispatch();
         assert_eq!(response.status(), Status::Ok);
         response = client
             .post("/api/v1/auth/login")
             .json(&json!({ "username_or_email": "failed@test.com", "password": "TotalFailur3!" }))
             .dispatch();
         assert_eq!(response.status(), Status::BadRequest);
+    }
+
+    #[test]
+    fn game_routes() {
+        let client = Client::tracked(rocket()).expect("valid rocket instance");
+        let mut response = client
+            .post("/api/v1/games")
+            .json(&json!({"name": "League of Legends"}))
+            .dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        response = client.get("/api/v1/games").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        assert_eq!(
+            response.into_json::<Response>(),
+            Some(Response {
+                message: String::from("Ok"),
+                data: json!([{"id": 1, "logo_url": "", "name": "League of Legends"}])
+            })
+        );
+        response = client.get("/api/v1/games/1").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+        assert_eq!(
+            response.into_json::<Response>(),
+            Some(Response {
+                message: String::from("Ok"),
+                data: json!({"id": 1, "logo_url": "", "name": "League of Legends"})
+            })
+        );
     }
 }
