@@ -12,14 +12,14 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Login to GitHub Container Registry
+    - name: Login to Scaleway Container Registry
       uses: docker/login-action@v1
       with:
         registry: rg.fr-par.scw.cloud/funcscwmoodbroadcastjv8inonx
         username: nologin
         password: ${{ secrets.SCW_SECRET_TOKEN }}
 
-    - name: Build the hello-world Docker image
+    - name: Build the mood-broadcast-api Docker image
       run: |
         docker build . --tag rg.fr-par.scw.cloud/funcscwmoodbroadcastjv8inonx/mood-broadcast-api:latest
         docker push rg.fr-par.scw.cloud/funcscwmoodbroadcastjv8inonx/mood-broadcast-api:latest
