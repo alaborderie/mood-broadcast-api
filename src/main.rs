@@ -58,7 +58,7 @@ fn rocket() -> _ {
 mod integration_test {
     use super::rocket;
     use crate::models::response::Response;
-    use rocket::http::Status;
+    use rocket::http::{Header, Status};
     use rocket::local::blocking::Client;
     use rocket::serde::json::json;
 
@@ -83,12 +83,41 @@ mod integration_test {
     #[test]
     fn game_routes() {
         let client = Client::tracked(rocket()).expect("valid rocket instance");
+        client
+            .post("/api/v1/auth/signup")
+            .json(&json!({ "username": "games_test", "email": "games@test.com", "password": "games_test"}))
+            .dispatch();
         let mut response = client
+            .post("/api/v1/auth/login")
+            .json(&json!({ "username_or_email": "games_test", "password": "games_test" }))
+            .dispatch();
+        let jwt: String = String::from(
+            response
+                .into_json::<Response>()
+                .unwrap()
+                .data
+                .get("token")
+                .unwrap()
+                .to_string()
+                .replace("\"", ""),
+        );
+        response = client
             .post("/api/v1/games")
+            .json(&json!({"name": "League of Legends"}))
+            .dispatch();
+        assert_eq!(response.status(), Status::Unauthorized);
+        response = client
+            .post("/api/v1/games")
+            .header(Header::new("Authorization", format!("Bearer {}", jwt)))
             .json(&json!({"name": "League of Legends"}))
             .dispatch();
         assert_eq!(response.status(), Status::Ok);
         response = client.get("/api/v1/games").dispatch();
+        assert_eq!(response.status(), Status::Unauthorized);
+        response = client
+            .get("/api/v1/games")
+            .header(Header::new("Authorization", format!("Bearer {}", jwt)))
+            .dispatch();
         assert_eq!(response.status(), Status::Ok);
         assert_eq!(
             response.into_json::<Response>(),
@@ -98,6 +127,11 @@ mod integration_test {
             })
         );
         response = client.get("/api/v1/games/1").dispatch();
+        assert_eq!(response.status(), Status::Unauthorized);
+        response = client
+            .get("/api/v1/games/1")
+            .header(Header::new("Authorization", format!("Bearer {}", jwt)))
+            .dispatch();
         assert_eq!(response.status(), Status::Ok);
         assert_eq!(
             response.into_json::<Response>(),

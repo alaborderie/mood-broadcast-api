@@ -56,7 +56,7 @@ impl<'r> FromRequest<'r> for UserToken {
                 Status::Unauthorized,
                 Json(Response {
                     message: String::from("Invalid token, please login again"),
-                    data: from_str("").unwrap(),
+                    data: from_str("{}").unwrap(),
                 }),
             ),
         ))
