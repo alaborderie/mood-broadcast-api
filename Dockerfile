@@ -10,7 +10,7 @@ COPY ./src ./src
 COPY ./migrations ./migrations
 COPY ./diesel.toml .
 
-RUN printf "[global.databases]\npostgres_database = { url = \"postgres://postgres:postgres@db/mood_broadcast\" }\n" > Rocket.toml; \
+RUN printf "[global.databases]\npostgres_database = { url = \"postgres://$DB_USER:$DB_PASSWORD@$DB_HOST/$DB_NAME\" }\n" > Rocket.toml; \
     head -c16 /dev/urandom > src/secret.key; \
     cargo build --release
 

@@ -20,6 +20,11 @@ jobs:
         password: ${{ secrets.SCW_SECRET_TOKEN }}
 
     - name: Build the mood-broadcast-api Docker image
+      env:
+        DB_USER: ${{ secrets.SCW_DB_USER }}
+        DB_PASSWORD: ${{ secrets.SCW_DB_PASSWORD }}
+        DB_HOST: ${{ secrets.SCW_DB_HOST }}
+        DB_NAME: ${{ secrets.SCW_DB_NAME }}
       run: |
         docker build . --tag rg.fr-par.scw.cloud/funcscwmoodbroadcastjv8inonx/mood-broadcast-api:latest
         docker push rg.fr-par.scw.cloud/funcscwmoodbroadcastjv8inonx/mood-broadcast-api:latest

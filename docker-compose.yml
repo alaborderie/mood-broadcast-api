@@ -15,5 +15,10 @@ services:
     restart: always
     ports:
     - "8000:8000"
+    environment:
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_NAME=mood_broadcast
     depends_on:
     - db
