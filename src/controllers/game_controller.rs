@@ -24,7 +24,10 @@ pub async fn create_game(
 }
 
 #[get("/")]
-pub async fn list_game(token: Result<UserToken, status::Custom<Json<Response>>>, conn: DbConn) -> status::Custom<Json<Response>> {
+pub async fn list_game(
+    token: Result<UserToken, status::Custom<Json<Response>>>,
+    conn: DbConn,
+) -> status::Custom<Json<Response>> {
     if let Err(e) = token {
         return e;
     }
@@ -36,7 +39,11 @@ pub async fn list_game(token: Result<UserToken, status::Custom<Json<Response>>>,
 }
 
 #[get("/<game_id>")]
-pub async fn find_game_by_id(game_id: i32, token: Result<UserToken, status::Custom<Json<Response>>>, conn: DbConn) -> status::Custom<Json<Response>> {
+pub async fn find_game_by_id(
+    game_id: i32,
+    token: Result<UserToken, status::Custom<Json<Response>>>,
+    conn: DbConn,
+) -> status::Custom<Json<Response>> {
     if let Err(e) = token {
         return e;
     }

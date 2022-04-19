@@ -112,9 +112,7 @@ mod integration_test {
             .json(&json!({"name": "League of Legends"}))
             .dispatch();
         assert_eq!(response.status(), Status::Ok);
-        response = client
-            .get("/api/v1/games")
-            .dispatch();
+        response = client.get("/api/v1/games").dispatch();
         assert_eq!(response.status(), Status::Unauthorized);
         response = client
             .get("/api/v1/games")
