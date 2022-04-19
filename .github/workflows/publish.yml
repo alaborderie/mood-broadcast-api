@@ -26,6 +26,6 @@ jobs:
         DB_HOST: ${{ secrets.SCW_DB_HOST }}
         DB_NAME: ${{ secrets.SCW_DB_NAME }}
       run: |
-        docker build . --tag rg.fr-par.scw.cloud/funcscwmoodbroadcastjv8inonx/mood-broadcast-api:latest
+        docker build . --build-arg DB_USER=$DB_USER --build-arg DB_PASSWORD=$DB_PASSWORD --build-arg DB_HOST=$DB_HOST --build-arg DB_NAME=$DB_NAME --tag rg.fr-par.scw.cloud/funcscwmoodbroadcastjv8inonx/mood-broadcast-api:latest
         docker push rg.fr-par.scw.cloud/funcscwmoodbroadcastjv8inonx/mood-broadcast-api:latest
 

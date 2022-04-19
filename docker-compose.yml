@@ -11,14 +11,14 @@ services:
     - POSTGRES_USER=postgres
     - POSTGRES_DB=mood_broadcast
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - DB_USER=postgres
+        - DB_PASSWORD=postgres
+        - DB_HOST=db
+        - DB_NAME=mood_broadcast
     restart: always
     ports:
     - "8000:8000"
-    environment:
-      - DB_USER=postgres
-      - DB_PASSWORD=postgres
-      - DB_HOST=db
-      - DB_NAME=mood_broadcast
-    depends_on:
-    - db
