@@ -112,6 +112,23 @@ impl User {
         .await
     }
 
+    pub async fn find_user_id_from_login_session(user_token: UserToken, db: &DbConn) -> Option<i32> {
+        db.run(move |conn| {
+            let result_user_id = users
+                .select(users::id)
+                .left_join(auth::table)
+                .filter(username.eq(&user_token.user))
+                .filter(auth::login_session.eq(&user_token.login_session))
+                .get_result::<i32>(conn);
+            if let Ok(user_id) = result_user_id {
+                Some(user_id)
+            } else {
+                None
+            }
+        })
+        .await
+    }
+
     pub async fn find_user_by_username(un: String, db: &DbConn) -> Option<User> {
         db.run(move |conn| {
             let result_user = users.filter(username.eq(un)).get_result::<User>(conn);

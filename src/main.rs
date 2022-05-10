@@ -19,6 +19,7 @@ pub mod services;
 
 use crate::controllers::auth_controller::*;
 use crate::controllers::game_controller::*;
+use crate::controllers::mood_controller::*;
 use diesel_migrations::embed_migrations;
 use rocket::fairing::AdHoc;
 use rocket::{Build, Rocket};
@@ -52,6 +53,7 @@ fn rocket() -> _ {
             "/api/v1/games",
             routes![create_game, find_game_by_id, list_game],
         )
+        .mount("/api/v1/moods", routes![create_mood, list_user_moods])
 }
 
 #[cfg(test)]
