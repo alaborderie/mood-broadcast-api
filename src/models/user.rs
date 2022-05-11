@@ -11,6 +11,7 @@ use uuid::Uuid;
 
 #[derive(Identifiable, Queryable, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
+#[table_name = "users"]
 pub struct User {
     pub id: i32,
     pub username: String,

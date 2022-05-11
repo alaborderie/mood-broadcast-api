@@ -26,6 +26,14 @@ pub struct MoodDTO {
     pub end_timestamp: DateTime<Utc>
 }
 
+#[derive(Serialize, Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct PartialMood {
+    pub game_id: i32,
+    pub begin_timestamp: DateTime<Utc>,
+    pub end_timestamp: DateTime<Utc>
+}
+
 impl Mood {
     pub async fn create(new_mood: MoodDTO, db: &DbConn) -> bool {
         db.run(move |conn| {
