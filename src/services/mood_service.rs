@@ -1,5 +1,5 @@
-use crate::models::mood::{Mood, MoodDTO};
 use crate::models::friend::Friend;
+use crate::models::mood::{Mood, MoodDTO};
 use crate::models::response::{Response, ResponseWithStatus};
 use crate::DbConn;
 use rocket::http::Status;
@@ -16,7 +16,6 @@ pub async fn get_by_user_id(user_id: i32, conn: DbConn) -> ResponseWithStatus {
         },
     }
 }
-
 
 pub async fn get_by_friend_id(user_id: i32, friend_id: i32, conn: DbConn) -> ResponseWithStatus {
     if Friend::is_friend_with(user_id, friend_id, &conn).await {

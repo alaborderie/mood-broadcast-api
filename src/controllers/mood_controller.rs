@@ -1,7 +1,7 @@
 use crate::jwt::UserToken;
 use crate::models::mood::{MoodDTO, PartialMood};
-use crate::models::user::User;
 use crate::models::response::Response;
+use crate::models::user::User;
 use crate::services::mood_service;
 use crate::DbConn;
 use rocket::http::Status;
@@ -23,7 +23,7 @@ pub async fn create_mood(
         user_id: user_id.unwrap(),
         game_id: partial_mood.game_id,
         begin_timestamp: partial_mood.begin_timestamp,
-        end_timestamp: partial_mood.end_timestamp
+        end_timestamp: partial_mood.end_timestamp,
     };
     let response = mood_service::create(mood, conn).await;
     status::Custom(
@@ -57,8 +57,8 @@ pub async fn list_user_moods(
 pub async fn get_moods_by_friend_id(
     token: Result<UserToken, status::Custom<Json<Response>>>,
     friend_id: i32,
-    conn: DbConn
-    ) -> status::Custom<Json<Response>> {
+    conn: DbConn,
+) -> status::Custom<Json<Response>> {
     if let Err(e) = token {
         return e;
     }
@@ -68,6 +68,5 @@ pub async fn get_moods_by_friend_id(
     status::Custom(
         Status::from_code(response.status_code).unwrap(),
         Json(response.response),
-        )
+    )
 }
-

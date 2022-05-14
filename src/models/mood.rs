@@ -13,7 +13,7 @@ pub struct Mood {
     pub user_id: i32,
     pub game_id: i32,
     pub begin_timestamp: DateTime<Utc>,
-    pub end_timestamp: DateTime<Utc>
+    pub end_timestamp: DateTime<Utc>,
 }
 
 #[derive(Insertable, Serialize, Deserialize)]
@@ -23,7 +23,7 @@ pub struct MoodDTO {
     pub user_id: i32,
     pub game_id: i32,
     pub begin_timestamp: DateTime<Utc>,
-    pub end_timestamp: DateTime<Utc>
+    pub end_timestamp: DateTime<Utc>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -31,7 +31,7 @@ pub struct MoodDTO {
 pub struct PartialMood {
     pub game_id: i32,
     pub begin_timestamp: DateTime<Utc>,
-    pub end_timestamp: DateTime<Utc>
+    pub end_timestamp: DateTime<Utc>,
 }
 
 impl Mood {
@@ -48,7 +48,13 @@ impl Mood {
     pub async fn get_by_user_id(filter_user_id: i32, db: &DbConn) -> Vec<Mood> {
         println!("{:?}", filter_user_id);
         println!("ok");
-        let moods_found = db.run(move |conn| moods.filter(user_id.eq(filter_user_id)).get_results::<Mood>(conn)).await;
+        let moods_found = db
+            .run(move |conn| {
+                moods
+                    .filter(user_id.eq(filter_user_id))
+                    .get_results::<Mood>(conn)
+            })
+            .await;
         println!("Ok");
         if moods_found.is_err() {
             return Vec::new();
@@ -61,7 +67,13 @@ impl Mood {
     }
 
     pub async fn get_by_user_ids(user_ids: Vec<i32>, db: &DbConn) -> Vec<Mood> {
-        let moods_found = db.run(move |conn| moods.filter(user_id.eq_any(user_ids)).get_results::<Mood>(conn)).await;
+        let moods_found = db
+            .run(move |conn| {
+                moods
+                    .filter(user_id.eq_any(user_ids))
+                    .get_results::<Mood>(conn)
+            })
+            .await;
         if moods_found.is_err() {
             return Vec::new();
         }
@@ -71,8 +83,19 @@ impl Mood {
         Vec::new()
     }
 
-    pub async fn get_by_game_ids_and_user_ids(game_ids: Vec<i32>, user_ids: Vec<i32>, db: &DbConn) -> Vec<Mood> {
-        let moods_found = db.run(move |conn| moods.filter(user_id.eq_any(user_ids)).filter(game_id.eq_any(game_ids)).get_results::<Mood>(conn)).await;
+    pub async fn get_by_game_ids_and_user_ids(
+        game_ids: Vec<i32>,
+        user_ids: Vec<i32>,
+        db: &DbConn,
+    ) -> Vec<Mood> {
+        let moods_found = db
+            .run(move |conn| {
+                moods
+                    .filter(user_id.eq_any(user_ids))
+                    .filter(game_id.eq_any(game_ids))
+                    .get_results::<Mood>(conn)
+            })
+            .await;
         if moods_found.is_err() {
             return Vec::new();
         }

@@ -53,7 +53,10 @@ fn rocket() -> _ {
             "/api/v1/games",
             routes![create_game, find_game_by_id, list_game],
         )
-        .mount("/api/v1/moods", routes![create_mood, list_user_moods, get_moods_by_friend_id])
+        .mount(
+            "/api/v1/moods",
+            routes![create_mood, list_user_moods, get_moods_by_friend_id],
+        )
 }
 
 #[cfg(test)]
@@ -111,7 +114,6 @@ mod integration_test {
         assert_eq!(response.status(), Status::BadRequest);
     }
 
-
     fn game_routes(client: &Client, jwt: String) {
         let mut response = client
             .post("/api/v1/games")
@@ -132,7 +134,13 @@ mod integration_test {
             .dispatch();
         assert_eq!(response.status(), Status::Ok);
         assert_eq!(
-            response.into_json::<Response>().unwrap().data.as_array().unwrap().first(),
+            response
+                .into_json::<Response>()
+                .unwrap()
+                .data
+                .as_array()
+                .unwrap()
+                .first(),
             Some(&json!({"id": 1, "logo_url": "", "name": "League of Legends"}))
         );
         response = client.get("/api/v1/games/1").dispatch();
@@ -163,9 +171,7 @@ mod integration_test {
             .json(&json!({"game_id": 1, "begin_timestamp": "1970-01-01T00:00:00Z", "end_timestamp": "1970-01-01T00:00:00Z"}))
             .dispatch();
         assert_eq!(response.status(), Status::Ok);
-        response = client
-            .get("/api/v1/moods")
-            .dispatch();
+        response = client.get("/api/v1/moods").dispatch();
         assert_eq!(response.status(), Status::Unauthorized);
         response = client
             .get("/api/v1/moods")
@@ -173,12 +179,18 @@ mod integration_test {
             .dispatch();
         assert_eq!(response.status(), Status::Ok);
         assert_eq!(
-            response.into_json::<Response>().unwrap().data.as_array().unwrap().first(),
-            Some(&json!({"id": 1, "game_id": 1, "begin_timestamp": "1970-01-01T00:00:00Z", "end_timestamp": "1970-01-01T00:00:00Z", "user_id": 2}))
+            response
+                .into_json::<Response>()
+                .unwrap()
+                .data
+                .as_array()
+                .unwrap()
+                .first(),
+            Some(
+                &json!({"id": 1, "game_id": 1, "begin_timestamp": "1970-01-01T00:00:00Z", "end_timestamp": "1970-01-01T00:00:00Z", "user_id": 2})
+            )
         );
-        response = client
-            .get("/api/v1/moods/friends/1")
-            .dispatch();
+        response = client.get("/api/v1/moods/friends/1").dispatch();
         assert_eq!(response.status(), Status::Unauthorized);
         response = client
             .get("/api/v1/moods/friends/1")

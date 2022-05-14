@@ -113,7 +113,10 @@ impl User {
         .await
     }
 
-    pub async fn find_user_id_from_login_session(user_token: UserToken, db: &DbConn) -> Option<i32> {
+    pub async fn find_user_id_from_login_session(
+        user_token: UserToken,
+        db: &DbConn,
+    ) -> Option<i32> {
         db.run(move |conn| {
             let result_user_id = users
                 .select(users::id)
