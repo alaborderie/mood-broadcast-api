@@ -37,10 +37,6 @@ impl Friend {
                     .get_result::<i32>(conn)
             })
             .await;
-        if let Ok(_friendship_id) = result_friendship_id {
-            true
-        } else {
-            false
-        }
+        matches!(result_friendship_id, Ok(_friendship_id))
     }
 }
