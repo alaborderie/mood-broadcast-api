@@ -27,5 +27,18 @@ pub struct FriendDTO {
 }
 
 impl Friend {
-
+    pub async fn is_friend_with(user_id: i32, friend_id: i32, db: &DbConn) -> bool {
+        let result_friendship_id = db.run(move |conn| {
+            friends
+                .select(friends::id)
+                .filter(user_from_id.eq(user_id).or(user_from_id.eq(friend_id)))
+                .filter(user_to_id.eq(friend_id).or(user_to_id.eq(user_id)))
+                .get_result::<i32>(conn)
+        }).await;
+        if let Ok(_friendship_id) = result_friendship_id {
+            true
+        } else {
+            false
+        }
+    }
 }
