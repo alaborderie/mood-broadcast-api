@@ -11,6 +11,7 @@ use uuid::Uuid;
 
 #[derive(Identifiable, Queryable, Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
+#[table_name = "users"]
 pub struct User {
     pub id: i32,
     pub username: String,
@@ -108,6 +109,26 @@ impl User {
                 .filter(auth::login_session.eq(&user_token.login_session))
                 .get_result::<i32>(conn)
                 .is_ok()
+        })
+        .await
+    }
+
+    pub async fn find_user_id_from_login_session(
+        user_token: UserToken,
+        db: &DbConn,
+    ) -> Option<i32> {
+        db.run(move |conn| {
+            let result_user_id = users
+                .select(users::id)
+                .left_join(auth::table)
+                .filter(username.eq(&user_token.user))
+                .filter(auth::login_session.eq(&user_token.login_session))
+                .get_result::<i32>(conn);
+            if let Ok(user_id) = result_user_id {
+                Some(user_id)
+            } else {
+                None
+            }
         })
         .await
     }

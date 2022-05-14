@@ -1,7 +1,7 @@
 CREATE TABLE moods (
     id SERIAL PRIMARY KEY NOT NULL,
-    user_id BIGINT NOT NULL REFERENCES users(id),
-    game_id BIGINT NOT NULL REFERENCES games(id),
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    game_id INTEGER NOT NULL REFERENCES games(id),
     begin_timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     end_timestamp TIMESTAMP WITH TIME ZONE NOT NULL
 );
