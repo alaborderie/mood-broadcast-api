@@ -14,3 +14,5 @@ To run the project, you need to create :
 # Run the project using Docker
 
 Run `docker-compose up` or build images yourself and run them :).
+
+Happy hacking
